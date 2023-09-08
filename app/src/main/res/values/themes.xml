@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Todyapp" parent="Theme.Material3.DayNight.NoActionBar">
+<!--        /&lt;!&ndash; Customize your light theme here. &ndash;&gt;-->
+         <item name="colorPrimary">#24a19c</item>
+    </style>
+
+    <style name="Theme.Todyapp" parent="Base.Theme.Todyapp" />
+</resources>

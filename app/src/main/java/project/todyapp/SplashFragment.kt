@@ -39,7 +39,7 @@ class SplashFragment : Fragment() {
         val binding = FragmentSplashBinding.inflate(inflater,container,false)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            parentFragmentManager.beginTransaction().add(R.id.main_activity,CreateTaskFragment()).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_activity,CreateTaskFragment()).commit()
 //            parentFragmentManager.beginTransaction().add(R.id.main_activity,HomePageFragment()).commit()
         },300)
 

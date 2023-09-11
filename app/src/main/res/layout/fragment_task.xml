@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:id="@+id/task_fragment"
     tools:context=".TaskFragment">
+
 
 
     <ImageButton
@@ -70,14 +72,13 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:autofillHints="name"
-        android:hint="Start typing"
+        android:hint="Your task ... "
         android:layout_marginTop="16dp"
         app:boxBackgroundColor="@color/white"
         app:boxStrokeColor="@color/white"
         app:boxStrokeWidth="0dp"
         app:helperTextTextColor="#BA2424"
         app:hintAnimationEnabled="false"
-
         app:hintTextColor="#7A7676"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -86,9 +87,9 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/text_org"
+            android:focusedByDefault="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:fontFamily="@font/gilroyregular"
             android:textColor="@color/black"
             android:textSize="15dp"
@@ -109,12 +110,21 @@
         app:layout_constraintTop_toTopOf="@+id/back" />
 
 
+    <View
+        android:id="@+id/back_constr"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B3000000"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:id="@+id/date_layout"
+        android:visibility="gone"
         android:background="@color/white"
         android:layout_marginTop="100dp"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -123,7 +133,6 @@
         <View
             android:id="@+id/view"
             android:layout_width="match_parent"
-
             android:layout_height="20dp"
             android:background="@drawable/background_variant"
             app:layout_constraintEnd_toEndOf="parent"
@@ -193,39 +202,40 @@
             app:layout_constraintTop_toBottomOf="@+id/imageView10" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/reschedele"
+            android:id="@+id/save"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_marginHorizontal="24dp"
             android:layout_marginVertical="24dp"
+            android:backgroundTint="#C2CBDC"
+            android:clickable="true"
+            android:drawableEnd="@drawable/send"
             android:fontFamily="@font/actor"
             android:text="Save task"
-            android:drawableEnd="@drawable/send"
+            android:textColor="#24a19c"
+            android:textSize="20dp"
+            app:cornerRadius="20dp"
             app:icon="@drawable/send"
             app:iconGravity="end"
             app:iconSize="20dp"
-            app:cornerRadius="20dp"
             app:iconTint="#24a19c"
-            android:backgroundTint="#f3f5f9"
-            android:textColor="#24a19c"
-            android:textSize="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/save"
+            android:id="@+id/reschedule"
             android:layout_width="0dp"
             android:layout_height="80dp"
             android:layout_marginHorizontal="24dp"
             android:layout_marginVertical="24dp"
             android:fontFamily="@font/actor"
             android:text="Reschedule"
+            android:textSize="20dp"
             app:cornerRadius="20dp"
             app:icon="@drawable/time"
             app:iconSize="20dp"
-            android:textSize="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

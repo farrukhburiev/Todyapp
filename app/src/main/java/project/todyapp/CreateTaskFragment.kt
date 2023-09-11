@@ -5,6 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import androidx.recyclerview.widget.LinearLayoutManager
+import project.todyapp.adapter.TaskAdapter
+import project.todyapp.database.AppDataBase
+import project.todyapp.database.entity.Task
 import project.todyapp.databinding.FragmentCreateTaskBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,14 +27,18 @@ private const val ARG_PARAM2 = "param2"
 class CreateTaskFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
-    private var param2: String? = null
+    private var param2: Task? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            param2 = it.getSerializable(ARG_PARAM2) as Task
         }
+    }
+
+    val appDatabase: AppDataBase by lazy {
+        AppDataBase.getInstance(requireContext())
     }
 
     override fun onCreateView(
@@ -37,20 +46,38 @@ class CreateTaskFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-//        val list_tasks =
+
+
+        var tasks: List<Task> = appDatabase.getTaskDao().getTasks()
+        val animation = AnimationUtils.loadAnimation(requireContext(),R.anim.anim)
         val binding = FragmentCreateTaskBinding.inflate(inflater,container,false)
         var calendar: Calendar = Calendar.getInstance()
         var simpleDateFormat = SimpleDateFormat.getInstance()
 
         var date:String = simpleDateFormat.format(calendar.time)
+        binding.createTask.startAnimation(animation)
 
         binding.createTask.setOnClickListener{
-            parentFragmentManager.beginTransaction().add(R.id.create,TaskFragment.newInstance(date)).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment.newInstance(date)).commit()
         }
+
+        val adapter = TaskAdapter(tasks, requireContext(), object : TaskAdapter.ItemClick {
+            override fun OnItemClick(task: Task, position: Int) {
+                parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment())
+                    .commit()
+            }
+        })
+
+        var manager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = manager
 
 
         return binding.root
     }
+
+
 
     companion object {
         /**
@@ -70,5 +97,9 @@ class CreateTaskFragment : Fragment() {
 
                 }
             }
+
+
+
+
     }
 }

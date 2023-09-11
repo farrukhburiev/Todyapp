@@ -58,12 +58,12 @@ class CreateTaskFragment : Fragment() {
         binding.createTask.startAnimation(animation)
 
         binding.createTask.setOnClickListener{
-            parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment.newInstance(date)).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment()).commit()
         }
 
         val adapter = TaskAdapter(tasks, requireContext(), object : TaskAdapter.ItemClick {
             override fun OnItemClick(task: Task, position: Int) {
-                parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment())
+                parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment.newInstance(date,task))
                     .commit()
             }
         })

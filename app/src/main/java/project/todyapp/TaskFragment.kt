@@ -3,16 +3,18 @@ package project.todyapp
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import project.todyapp.database.AppDataBase
 import project.todyapp.database.entity.Task
 import project.todyapp.databinding.FragmentTaskBinding
+import java.text.SimpleDateFormat
 import java.time.LocalTime
+import java.util.Calendar
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -28,17 +30,24 @@ class TaskFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: Task? = null
-    var dueTime:LocalTime? = null
-    var time:String? = null
-    var date:String? = null
+
+    var dueTime: LocalTime? = null
+    var time: String? = null
+    var calendar: Calendar? = null
+    var simpleDateFormat: SimpleDateFormat? = null
+    var date: String? = null
+    var tasks: List<Task>? = null
+    var binding: FragmentTaskBinding? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
-//            param2 = it.getSerializable(ARG_PARAM2) as Task
+            param2 = it.getSerializable(ARG_PARAM2) as Task
         }
     }
+
     val appDataBase: AppDataBase by lazy {
         AppDataBase.getInstance(requireContext())
     }
@@ -47,61 +56,73 @@ class TaskFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentTaskBinding.inflate(inflater,container,false)
+        binding = FragmentTaskBinding.inflate(inflater, container, false)
+
+        takeDate()
+
+        tasks = appDataBase.getTaskDao().getTasks()
 
 
-//        var tasks = appDataBase.getTaskDao().getTasks()
-        binding.date!!.text = param1
-//        if (param2 != null){
-//            for (i in tasks){
-//                if (i.id == param2!!.id){
-////                    binding.textOrg.text =
-////                    binding.date.text = param2!!.date
-////
-//
-//                }
-//            }
-//        }
-
-        binding.textOrg?.addTextChangedListener {
-            if (binding.textOrg?.text?.length!! > 0){
-                binding.send!!.visibility = View.VISIBLE
-            }
-            else{
-                binding.send!!.visibility = View.INVISIBLE
-//                Toast.makeText(requireContext(), "title or task cannot be empty", Toast.LENGTH_SHORT).show()
+        if (param2 != null) {
+            for (i in tasks!!) {
+                if (i.id == param2!!.id) {
+                    binding!!.textOrg.setText(param2!!.task)
+                    binding!!.titleOrg.setText(param2!!.title)
+                }
             }
         }
 
-        binding.send!!.setOnClickListener{
-            binding.dateLayout!!.visibility = View.VISIBLE
-            binding.backConstr!!.visibility = View.VISIBLE
+
+
+        setViewProperties(nullChecker())
+
+        binding!!.textOrg.addTextChangedListener {
+            setViewProperties(nullChecker())
         }
 
-        binding.calendarView!!.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            Toast.makeText(requireContext(), dayOfMonth.toString() + "/" + month.toString() + "/" + year.toString(), Toast.LENGTH_LONG).show();
+        binding!!.send.setOnClickListener {
+            binding!!.dateLayout.visibility = View.VISIBLE
+
+        }
+
+        binding!!.calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            Toast.makeText(
+                requireContext(),
+                dayOfMonth.toString() + "/" + month.toString() + "/" + year.toString(),
+                Toast.LENGTH_LONG
+            ).show();
             date = dayOfMonth.toString() + "/" + month.toString() + "/" + year.toString()
         }
-        binding.reschedule!!.setOnClickListener {
+
+        binding!!.reschedule.setOnClickListener {
             openTimePicker()
         }
 
-        binding.save!!.setOnClickListener {
-            appDataBase.getTaskDao().addTask(Task(task = binding.textOrg.text.toString(), time = time!!, date = date!!, title = binding.titleOrg.text.toString()))
-            parentFragmentManager.beginTransaction().replace(R.id.task_fragment,CreateTaskFragment()).commit()
-            Log.d("AAAA", "onCreateView: "+ time)
+        binding!!.save.setOnClickListener {
+            appDataBase.getTaskDao().addTask(
+                Task(
+                    task = binding!!.textOrg.text.toString(),
+                    time = time!!,
+                    date = date!!,
+                    title = binding!!.titleOrg.text.toString()
+                )
+            )
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
+            Log.d("AAAA", "onCreateView: " + time)
 
         }
 
-        binding.back.setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.task_fragment,CreateTaskFragment()).commit()
+        binding!!.back.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
         }
 
 
 
 
 
-        return binding.root
+        return binding!!.root
     }
 
     private fun openTimePicker() {
@@ -113,11 +134,33 @@ class TaskFragment : Fragment() {
 
             }
 
-        val dialog = TimePickerDialog(requireContext(),listener,dueTime!!.hour, dueTime!!.minute,true)
+        val dialog =
+            TimePickerDialog(requireContext(), listener, dueTime!!.hour, dueTime!!.minute, true)
         dialog.setTitle("Enter youtr task time")
 
         dialog.show()
     }
+
+    private fun nullChecker(): Boolean {
+        if (binding!!.textOrg.text!!.length > 0) {
+            return true
+        } else
+            return false }
+
+    private fun setViewProperties(state: Boolean){
+        if (state){
+            binding!!.send.visibility = View.VISIBLE
+        }
+        else binding!!.send.visibility = View.GONE
+    }
+
+    private fun takeDate() {
+        calendar = Calendar.getInstance()
+        simpleDateFormat = SimpleDateFormat.getInstance() as SimpleDateFormat?
+        date = simpleDateFormat!!.format(calendar!!.time)
+        binding!!.date.text = date
+    }
+
 
     companion object {
         /**
@@ -130,20 +173,14 @@ class TaskFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String) =
+        fun newInstance(param1: String, param2: Task?) =
             TaskFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
+                    putSerializable(ARG_PARAM2, param2)
                 }
             }
 
-        fun new(task:
-        ) =
-            CreateTaskFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(ARG_PARAM2, task)
 
-                }
-            }
     }
 }

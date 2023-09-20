@@ -66,6 +66,11 @@ class CreateTaskFragment : Fragment() {
                 parentFragmentManager.beginTransaction().replace(R.id.create,TaskFragment.newInstance(date,task))
                     .commit()
             }
+
+            override fun OnButtonClick(task: Task, position: Int) {
+
+            }
+
         })
 
         var manager =

@@ -10,6 +10,6 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
 
         supportFragmentManager.beginTransaction().add(R.id.main_activity,SplashFragment()).commit()
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
     }
 }

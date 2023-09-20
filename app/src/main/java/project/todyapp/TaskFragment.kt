@@ -1,20 +1,29 @@
 package project.todyapp
 
 import android.app.TimePickerDialog
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import project.todyapp.database.AppDataBase
 import project.todyapp.database.entity.Task
 import project.todyapp.databinding.FragmentTaskBinding
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.util.Calendar
+import java.util.Date
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -31,13 +40,16 @@ class TaskFragment : Fragment() {
     private var param1: String? = null
     private var param2: Task? = null
 
+    private lateinit var currentFilePath: String
+
     var dueTime: LocalTime? = null
     var time: String? = null
     var calendar: Calendar? = null
     var simpleDateFormat: SimpleDateFormat? = null
     var date: String? = null
     var tasks: List<Task>? = null
-    var binding: FragmentTaskBinding? = null
+    lateinit var binding: FragmentTaskBinding
+    private lateinit var img: ImageView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +69,8 @@ class TaskFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentTaskBinding.inflate(inflater, container, false)
+        Log.d("ZXCV", "onCreateView: "+ param2.toString())
+        img = binding!!.photo
 
         takeDate()
 
@@ -64,12 +78,9 @@ class TaskFragment : Fragment() {
 
 
         if (param2 != null) {
-            for (i in tasks!!) {
-                if (i.id == param2!!.id) {
-                    binding!!.textOrg.setText(param2!!.task)
-                    binding!!.titleOrg.setText(param2!!.title)
-                }
-            }
+            binding!!.textOrg.setText(param2!!.task)
+            binding!!.titleOrg.setText(param2!!.title)
+//            binding.photo.
         }
 
 
@@ -99,30 +110,99 @@ class TaskFragment : Fragment() {
         }
 
         binding!!.save.setOnClickListener {
-            appDataBase.getTaskDao().addTask(
-                Task(
+            if(param2==null){
+
+                add(Task(
+//                id = param2!!.id,
                     task = binding!!.textOrg.text.toString(),
-                    time = time!!,
                     date = date!!,
-                    title = binding!!.titleOrg.text.toString()
+                    time = time!!,
+                    title = binding!!.titleOrg.text.toString(),
+                    filePath = currentFilePath
+                ))
+            }
+            else {
+                update(
+                    Task(
+                        id = param2!!.id,
+                        task = binding!!.textOrg.text.toString(),
+                        date = date!!,
+                        time = time!!,
+                        title = binding!!.titleOrg.text.toString(),
+                        filePath = currentFilePath
+
+                    )
                 )
+            }
+        }
+
+        binding.back.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
+        }
+
+        binding.gallery.setOnClickListener {
+            takePhotoResult.launch("image/*")
+        }
+
+        binding.camera.setOnClickListener {
+            dispatchTakePictureIntent()
+        }
+
+
+
+
+
+        return binding.root
+    }
+
+    val takePhotoResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@registerForActivityResult
+        img.setImageURI(uri)
+        //rasmni alohida xotiraga saqlash
+
+        val openInputStream = requireActivity().contentResolver?.openInputStream(uri)
+        val file = File(requireActivity().filesDir, "${System.currentTimeMillis()}.jpg")
+        val fileOutputStream = FileOutputStream(file)
+        openInputStream?.copyTo(fileOutputStream)
+        currentFilePath = file.absolutePath
+        openInputStream?.close()
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentFilePath = absolutePath
+        }
+    }
+
+    private fun dispatchTakePictureIntent() {
+        val photoFile: File? = try {
+            createImageFile()
+        } catch (ex: IOException) {
+            null
+        }
+
+        photoFile?.let {
+            val photoURI: Uri = FileProvider.getUriForFile(
+                requireContext(),
+                "package project.todyapp",
+                it
             )
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
-            Log.d("AAAA", "onCreateView: " + time)
-
+            takePhotoResultCamera.launch(photoURI)
         }
-
-        binding!!.back.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
+    }
+    val takePhotoResultCamera = registerForActivityResult(ActivityResultContracts.TakePicture()) {
+        if (it) {
+            img.setImageURI(Uri.fromFile(File(currentFilePath)))
         }
-
-
-
-
-
-        return binding!!.root
     }
 
     private fun openTimePicker() {
@@ -135,8 +215,8 @@ class TaskFragment : Fragment() {
             }
 
         val dialog =
-            TimePickerDialog(requireContext(), listener, dueTime!!.hour, dueTime!!.minute, true)
-        dialog.setTitle("Enter youtr task time")
+            TimePickerDialog(requireContext(), listener, dueTime!!.hour, dueTime!!.minute, false)
+        dialog.setTitle("Enter your task time")
 
         dialog.show()
     }
@@ -145,14 +225,35 @@ class TaskFragment : Fragment() {
         if (binding!!.textOrg.text!!.length > 0) {
             return true
         } else
-            return false }
-
-    private fun setViewProperties(state: Boolean){
-        if (state){
-            binding!!.send.visibility = View.VISIBLE
-        }
-        else binding!!.send.visibility = View.GONE
+            return false
     }
+
+    private fun setViewProperties(state: Boolean) {
+        if (state) {
+            binding!!.send.visibility = View.VISIBLE
+        } else binding!!.send.visibility = View.GONE
+    }
+
+    private fun update(task: Task) {
+
+            tasks = appDataBase.getTaskDao().getTasks()
+            appDataBase.getTaskDao().updateTask(task)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
+
+
+
+    }
+
+
+    private fun add(task: Task){
+
+            appDataBase.getTaskDao().addTask(task)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.task_fragment, CreateTaskFragment()).commit()
+
+    }
+
 
     private fun takeDate() {
         calendar = Calendar.getInstance()

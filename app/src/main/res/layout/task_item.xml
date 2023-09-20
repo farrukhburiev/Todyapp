@@ -16,6 +16,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/card_empty" />
 
+    <View
+        android:layout_width="match_parent"
+        android:id="@+id/another_layout"
+        android:layout_height="100dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/paragraph"
         android:layout_width="wrap_content"
@@ -69,6 +79,18 @@
         app:layout_constraintEnd_toEndOf="@+id/task_layout"
         app:layout_constraintTop_toTopOf="@+id/task_layout"
         app:srcCompat="@drawable/more" />
+
+    <Spinner
+        android:visibility="gone"
+        android:id="@+id/spinner_options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:theme="@style/MaterialAlertDialog.MaterialComponents.Title.Text"
+        app:layout_constraintBottom_toBottomOf="@+id/more_btn"
+        app:layout_constraintEnd_toEndOf="@+id/more_btn"
+        app:layout_constraintTop_toTopOf="@+id/more_btn" />
 
     <ImageView
         android:id="@+id/imageView13"

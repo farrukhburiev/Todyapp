@@ -11,5 +11,6 @@ class Task(
     var task:String,
     var time:String,
     var date:String,
-    var title:String
+    var title:String,
+    var filePath:String
 ) : Serializable
